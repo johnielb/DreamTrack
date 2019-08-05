@@ -142,11 +142,21 @@ int SavePPM(char fn[5]) {
     return 0;
 }
 
-char** convolve() {
-    char **edges= new char*[CAMERA_HEIGHT];
+int main()
+{
+    // enter image file name
+    char file_name[7];
+    printf(" Enter input image file name(with extension:\n");
+    scanf("%s",file_name);
+    printf(" You enter:%s\n",file_name);
+    // read image file
+    if (ReadPPM(file_name) != 0){
+        printf(" Can not open file\n");
+        return -1;
+    };
+    char edges[CAMERA_HEIGHT][CAMERA_WIDTH];
     // do your processing here
     for (int row = 0; row<CAMERA_HEIGHT; row++) {
-        edges[row] = new char[CAMERA_WIDTH];
         for (int col = 0; col<CAMERA_WIDTH; col++) {
             if (row>0 && col>0 && row<CAMERA_HEIGHT && col<CAMERA_WIDTH) {
                 double rx = -get_pixel(row-1,col-1,0) + get_pixel(row-1,col+1,0) -
@@ -171,25 +181,9 @@ char** convolve() {
             }
         }
     }
-    return edges;
-}
-
-int main()
-{
-    // enter image file name
-    char file_name[7];
-    printf(" Enter input image file name(with extension:\n");
-    scanf("%s",file_name);
-    printf(" You enter:%s\n",file_name);
-    // read image file
-    if (ReadPPM(file_name) != 0){
-        printf(" Can not open file\n");
-        return -1;
-    };
-    char** edges = convolve();
     printf("convolution done\n");
-    int minR = 100;
-    int maxR = 101;
+    int minR = 40;
+    int maxR = 45;
     printf("Start accumulating\n");
     int accum[320][240];
     for (int y=0; y<CAMERA_HEIGHT; y++) {
@@ -197,25 +191,23 @@ int main()
             for (int r=minR; r<maxR; r++) {
                 for (int deg=0; deg<360; deg++) {
                     int a = (int) (x - (r * cos(deg*DEG2RAD)));
-                    int b = (int) (y - (r * sin(deg*DEG2RAD)));
+                    int b = (int) (y + (r * sin(deg*DEG2RAD)));
                     if (a >= CAMERA_WIDTH || a < 0) {
                         continue;
                     }
                     if (b >= CAMERA_HEIGHT || b < 0) {
                         continue;
                     }
-                    /*if (y>127) {
-                        printf("x: %d y: %d a: %d b: %d\n", x, y, a, b);
-                    }*/
-                    //printf("x: %d y: %d r: %d deg: %d\n", x, y, r, deg);
+                    //if (x==125 && y==150) printf("x: %d y: %d a: %d b: %d\n", x, y, a, b);
                     //int i = (y*CAMERA_HEIGHT)+(r-minR)/10;
                     if (edges[b][a] == 1) {
                         accum[x][y] += 1;
                     }
+                    if (x==159 && y==115) edges[b][a] = 2;
                 }
             }
         }
-        printf("y: %d\n",y);
+        //printf("y: %d\n",y);
     }
     printf("Finished accumulating\n");
     int maxedX = 0;
@@ -223,22 +215,31 @@ int main()
     int maxedVote = 0;
     for (int y=0; y<CAMERA_HEIGHT; y++) {
         for (int x=0; x<CAMERA_WIDTH; x++) {
-            //printf("x: %d y: %d votes: %d\n", x, y, accum[x][y]);
+            if (x>120 && x<125 && y>150 && y<155) printf("x: %d y: %d votes: %d\n", x, y, accum[x][y]);
             if (accum[x][y]>maxedVote) {
                 maxedVote = accum[x][y];
                 maxedX = x;
                 maxedY = y;
             }
         }
-        printf("y: %d\n",y);
+        //printf("y: %d\n",y);
     }
     printf("x: %d y: %d votes: %d\n",maxedX,maxedY,maxedVote);
+
+
 
     // save convolved image to file
     for (int row = 0; row<CAMERA_HEIGHT; row++) {
         for (int col = 0; col<CAMERA_WIDTH; col++) {
             set_pixel(row,col,0,0,0);
             if (edges[row][col]==1) set_pixel(row,col,255,255,255);
+            if (edges[row][col]==2) set_pixel(row,col,0,255,0);
+        }
+    }
+
+    for (int i = -5; i<5; i++) {
+        for (int j = -5; j<5; j++) {
+            set_pixel(maxedY, maxedX, 255,0,0);
         }
     }
 
