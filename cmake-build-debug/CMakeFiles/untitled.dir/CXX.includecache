@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+C:/Users/johni/CLionProjects/DreamTrack/HCDfromImage.cpp
+cstdio
+-
+cstdlib
+-
+cctype
+-
+cmath
+-
+
