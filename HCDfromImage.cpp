@@ -142,21 +142,11 @@ int SavePPM(char fn[5]) {
     return 0;
 }
 
-int main()
-{
-    // enter image file name
-    char file_name[7];
-    printf(" Enter input image file name(with extension:\n");
-    scanf("%s",file_name);
-    printf(" You enter:%s\n",file_name);
-    // read image file
-    if (ReadPPM(file_name) != 0){
-        printf(" Can not open file\n");
-        return -1;
-    };
-    char edges[CAMERA_HEIGHT][CAMERA_WIDTH];
+char** convolve() {
+    char **edges= new char*[CAMERA_HEIGHT];
     // do your processing here
     for (int row = 0; row<CAMERA_HEIGHT; row++) {
+        edges[row] = new char[CAMERA_WIDTH];
         for (int col = 0; col<CAMERA_WIDTH; col++) {
             if (row>0 && col>0 && row<CAMERA_HEIGHT && col<CAMERA_WIDTH) {
                 double rx = -get_pixel(row-1,col-1,0) + get_pixel(row-1,col+1,0) -
@@ -181,6 +171,22 @@ int main()
             }
         }
     }
+    return edges;
+}
+
+int main()
+{
+    // enter image file name
+    char file_name[7];
+    printf(" Enter input image file name(with extension:\n");
+    scanf("%s",file_name);
+    printf(" You enter:%s\n",file_name);
+    // read image file
+    if (ReadPPM(file_name) != 0){
+        printf(" Can not open file\n");
+        return -1;
+    };
+    char** edges = convolve();
     printf("convolution done\n");
     int minR = 100;
     int maxR = 101;
