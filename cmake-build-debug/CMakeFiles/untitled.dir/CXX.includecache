@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-C:/Users/johni/CLionProjects/DreamTrack/HCDfromImage.cpp
+/Users/johniel/CLionProjects/DreamTrack/HCDfromImage.cpp
 cstdio
 -
 cstdlib

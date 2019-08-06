@@ -148,48 +148,38 @@ int main()
     char file_name[7];
     printf(" Enter input image file name(with extension:\n");
     scanf("%s",file_name);
-    printf(" You enter:%s\n",file_name);
+    //printf(" You enter:%s\n",file_name);
     // read image file
     if (ReadPPM(file_name) != 0){
         printf(" Can not open file\n");
         return -1;
     };
+    /* OUR CODE STARTS HERE */
     char edges[CAMERA_HEIGHT][CAMERA_WIDTH];
-    // do your processing here
     for (int row = 0; row<CAMERA_HEIGHT; row++) {
         for (int col = 0; col<CAMERA_WIDTH; col++) {
-            if (row>0 && col>0 && row<CAMERA_HEIGHT && col<CAMERA_WIDTH) {
-                double rx = -get_pixel(row-1,col-1,0) + get_pixel(row-1,col+1,0) -
-                            2.0*(get_pixel(row, col-1,0)) + 2.0*(get_pixel(row, col+1,0)) -
-                            get_pixel(row+1,col-1,0) + get_pixel(row+1,col+1,0);
-                double ry = -get_pixel(row-1,col-1,0) - 2.0*get_pixel(row-1,col,0) - (get_pixel(row-1, col+1,0)) +
-                            (get_pixel(row+1, col-1,0)) + 2.0*(get_pixel(row+1,col,0)) + get_pixel(row+1,col+1,0);
-                /*double gx = -get_pixel(row-1,col-1,1) + get_pixel(row-1,col+1,1) -
-                            2.0*(get_pixel(row, col-1,1)) + 2.0*(get_pixel(row, col+1,1)) -
-                            get_pixel(row+1,col-1,1) + get_pixel(row+1,col+1,1);
-                double gy = -get_pixel(row-1,col-1,1) - 2.0*get_pixel(row-1,col,1) - (get_pixel(row-1, col+1,1)) +
-                            (get_pixel(row+1, col-1,1)) + 2.0*(get_pixel(row+1,col,1)) + get_pixel(row+1,col+1,1);*/
-                /*double bx = -get_pixel(row-1,col-1,2) + get_pixel(row-1,col+1,2) -
-                            2.0*(get_pixel(row, col-1,2)) + 2.0*(get_pixel(row, col+1,2)) -
-                            get_pixel(row+1,col-1,2) + get_pixel(row+1,col+1,2);
-                double by = -get_pixel(row-1,col-1,2) - 2.0*get_pixel(row-1,col,2) - (get_pixel(row-1, col+1,2)) +
-                            (get_pixel(row+1, col-1,2)) + 2.0*(get_pixel(row+1,col,1)) + get_pixel(row+1,col+1,2);*/
+            int setting = 0; //redness
+            if (row>0 && col>0 && row<CAMERA_HEIGHT-2 && col<CAMERA_WIDTH-2) { // convolve using Sobel kernels
+                double sobelX = -get_pixel(row-1,col-1,setting) + get_pixel(row-1,col+1,setting) -
+                            2.0*(get_pixel(row, col-1,setting)) + 2.0*(get_pixel(row, col+1,setting)) -
+                            get_pixel(row+1,col-1,setting) + get_pixel(row+1,col+1,setting);
+                double sobelY = -get_pixel(row-1,col-1,setting) - 2.0*get_pixel(row-1,col,setting) - (get_pixel(row-1, col+1,setting)) +
+                            (get_pixel(row+1, col-1,setting)) + 2.0*(get_pixel(row+1,col,setting)) + get_pixel(row+1,col+1,setting);
                 edges[row][col] = 0;
-                if (fabs(rx)+fabs(ry) > 70.0) edges[row][col] = 1;
+                if (fabs(sobelX)+fabs(sobelY) > 70.0) edges[row][col] = 1;
             } else {
                 edges[row][col] = 0;
             }
         }
     }
-    printf("convolution done\n");
-    int minR = 40;
-    int maxR = 45;
-    printf("Start accumulating\n");
+    //printf("convolution done\n");
+    int radius = 43;
+    //printf("Start accumulating\n");
     int accum[320][240];
     for (int y=0; y<CAMERA_HEIGHT; y++) {
         for (int x=0; x<CAMERA_WIDTH; x++) {
-            for (int r=minR; r<maxR; r++) {
-                for (int deg=0; deg<360; deg++) {
+            for (int r=radius-3; r<radius+3; r++) {
+                for (int deg=0; deg<360; deg+=10) {
                     int a = (int) (x - (r * cos(deg*DEG2RAD)));
                     int b = (int) (y + (r * sin(deg*DEG2RAD)));
                     if (a >= CAMERA_WIDTH || a < 0) {
@@ -203,19 +193,19 @@ int main()
                     if (edges[b][a] == 1) {
                         accum[x][y] += 1;
                     }
-                    if (x==159 && y==115) edges[b][a] = 2;
+                    //if (x==159 && y==115) edges[b][a] = 2;
                 }
             }
         }
         //printf("y: %d\n",y);
     }
-    printf("Finished accumulating\n");
+    //printf("Finished accumulating\n");
     int maxedX = 0;
     int maxedY = 0;
     int maxedVote = 0;
-    for (int y=0; y<CAMERA_HEIGHT; y++) {
-        for (int x=0; x<CAMERA_WIDTH; x++) {
-            if (x>120 && x<125 && y>150 && y<155) printf("x: %d y: %d votes: %d\n", x, y, accum[x][y]);
+    for (int y=1; y<CAMERA_HEIGHT-1; y++) {
+        for (int x=1; x<CAMERA_WIDTH-1; x++) {
+            //if (x>120 && x<125 && y>150 && y<155) printf("x: %d y: %d votes: %d\n", x, y, accum[x][y]);
             if (accum[x][y]>maxedVote) {
                 maxedVote = accum[x][y];
                 maxedX = x;
@@ -226,8 +216,6 @@ int main()
     }
     printf("x: %d y: %d votes: %d\n",maxedX,maxedY,maxedVote);
 
-
-
     // save convolved image to file
     for (int row = 0; row<CAMERA_HEIGHT; row++) {
         for (int col = 0; col<CAMERA_WIDTH; col++) {
@@ -236,10 +224,10 @@ int main()
             if (edges[row][col]==2) set_pixel(row,col,0,255,0);
         }
     }
-
-    for (int i = -5; i<5; i++) {
-        for (int j = -5; j<5; j++) {
-            set_pixel(maxedY, maxedX, 255,0,0);
+    // mark red square where it thinks circle is
+    for (int i = -3; i<3; i++) {
+        for (int j = -3; j<3; j++) {
+            set_pixel(maxedY+i, maxedX+j, 255,0,0);
         }
     }
 

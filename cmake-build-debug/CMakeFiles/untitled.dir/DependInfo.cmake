@@ -4,9 +4,9 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "C:/Users/johni/CLionProjects/DreamTrack/HCDfromImage.cpp" "C:/Users/johni/CLionProjects/DreamTrack/cmake-build-debug/CMakeFiles/untitled.dir/HCDfromImage.cpp.obj"
+  "/Users/johniel/CLionProjects/DreamTrack/HCDfromImage.cpp" "/Users/johniel/CLionProjects/DreamTrack/cmake-build-debug/CMakeFiles/untitled.dir/HCDfromImage.cpp.o"
   )
-set(CMAKE_CXX_COMPILER_ID "GNU")
+set(CMAKE_CXX_COMPILER_ID "AppleClang")
 
 # The include file search paths:
 set(CMAKE_CXX_TARGET_INCLUDE_PATH

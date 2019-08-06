@@ -1,9 +1,7 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/untitled.dir/HCDfromImage.cpp.obj"
+  "CMakeFiles/untitled.dir/HCDfromImage.cpp.o"
   "untitled.pdb"
-  "untitled.exe"
-  "untitled.exe.manifest"
-  "libuntitled.dll.a"
+  "untitled"
 )
 
 # Per-language clean rules from dependency scanning.
