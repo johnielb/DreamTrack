@@ -154,15 +154,28 @@ int main()
         printf(" Can not open file\n");
         return -1;
     };
-    /* OUR CODE STARTS HERE */
+    /* OUR CODE STARTS HERE: Convolution */
     char edges[CAMERA_HEIGHT][CAMERA_WIDTH];
+    int rCount = 0;
+    int diameter = 0;
     for (int row = 0; row<CAMERA_HEIGHT; row++) {
         for (int col = 0; col<CAMERA_WIDTH; col++) {
-            int setting = 0; //redness
+            int red = get_pixel(row, col, 0);
+            int grn = get_pixel(row, col, 1);
+            // sun diameter detection
+            if ((float)grn/(float)red < 0.4) {
+                rCount++;
+            } else {
+                if (rCount>diameter) diameter=rCount;
+                rCount = 0;
+            }
+            int setting = 0; // convolve redness vals
             if (row>0 && col>0 && row<CAMERA_HEIGHT-2 && col<CAMERA_WIDTH-2) { // convolve using Sobel kernels
+                // vertical edge detect
                 double sobelX = -get_pixel(row-1,col-1,setting) + get_pixel(row-1,col+1,setting) -
                             2.0*(get_pixel(row, col-1,setting)) + 2.0*(get_pixel(row, col+1,setting)) -
                             get_pixel(row+1,col-1,setting) + get_pixel(row+1,col+1,setting);
+                // horizontal edge detect
                 double sobelY = -get_pixel(row-1,col-1,setting) - 2.0*get_pixel(row-1,col,setting) - (get_pixel(row-1, col+1,setting)) +
                             (get_pixel(row+1, col-1,setting)) + 2.0*(get_pixel(row+1,col,setting)) + get_pixel(row+1,col+1,setting);
                 edges[row][col] = 0;
@@ -172,42 +185,42 @@ int main()
             }
         }
     }
-    //printf("convolution done\n");
-    int radius = 43;
-    //printf("Start accumulating\n");
-    int accum[320][240];
+    //printf("Convolution done\n");
+    int radius = diameter/2 + 1;
+
+    /* ACCUMULATION/VOTING */
+    //printf("Start voting\n");
+    int votes[320][240];
     for (int y=0; y<CAMERA_HEIGHT; y++) {
         for (int x=0; x<CAMERA_WIDTH; x++) {
             for (int r=radius-3; r<radius+3; r++) {
                 for (int deg=0; deg<360; deg+=10) {
                     int a = (int) (x - (r * cos(deg*DEG2RAD)));
                     int b = (int) (y + (r * sin(deg*DEG2RAD)));
-                    if (a >= CAMERA_WIDTH || a < 0) {
+                    if (a >= CAMERA_WIDTH || a < 0) { // don't look outside camera bounds
                         continue;
                     }
                     if (b >= CAMERA_HEIGHT || b < 0) {
                         continue;
                     }
-                    //if (x==125 && y==150) printf("x: %d y: %d a: %d b: %d\n", x, y, a, b);
                     //int i = (y*CAMERA_HEIGHT)+(r-minR)/10;
                     if (edges[b][a] == 1) {
-                        accum[x][y] += 1;
+                        votes[x][y] += 1;
                     }
-                    //if (x==159 && y==115) edges[b][a] = 2;
                 }
             }
         }
-        //printf("y: %d\n",y);
     }
-    //printf("Finished accumulating\n");
+    //printf("Finished voting\n");
+
+    /* TALLY THE VOTES */
     int maxedX = 0;
     int maxedY = 0;
     int maxedVote = 0;
     for (int y=1; y<CAMERA_HEIGHT-1; y++) {
-        for (int x=1; x<CAMERA_WIDTH-1; x++) {
-            //if (x>120 && x<125 && y>150 && y<155) printf("x: %d y: %d votes: %d\n", x, y, accum[x][y]);
-            if (accum[x][y]>maxedVote) {
-                maxedVote = accum[x][y];
+        for (int x = 1; x < CAMERA_WIDTH - 1; x++) {
+            if (votes[x][y] > maxedVote) {
+                maxedVote = votes[x][y];
                 maxedX = x;
                 maxedY = y;
             }
@@ -215,29 +228,29 @@ int main()
         //printf("y: %d\n",y);
     }
     printf("x: %d y: %d votes: %d\n",maxedX,maxedY,maxedVote);
+    char rVal = get_pixel(maxedY,maxedX,0);
+    char gVal = get_pixel(maxedY,maxedX,1);
+    if ((float)gVal/(float)rVal < 0.4) {
+        printf("Sun found there.\n");
+        // mark red square where it thinks circle is
+        for (int i = -3; i<3; i++) {
+            for (int j = -3; j<3; j++) {
+                set_pixel(maxedY+i, maxedX+j, 255,0,0);
+            }
+        }
+    }
 
-    // save convolved image to file
+    // save convolved image to image buffer
     for (int row = 0; row<CAMERA_HEIGHT; row++) {
         for (int col = 0; col<CAMERA_WIDTH; col++) {
             set_pixel(row,col,0,0,0);
             if (edges[row][col]==1) set_pixel(row,col,255,255,255);
-            if (edges[row][col]==2) set_pixel(row,col,0,255,0);
-        }
-    }
-    // mark red square where it thinks circle is
-    for (int i = -3; i<3; i++) {
-        for (int j = -3; j<3; j++) {
-            set_pixel(maxedY+i, maxedX+j, 255,0,0);
         }
     }
 
-    /*for ( int r = 10; r<30;r++){
-       set_pixel(r,10,0,255,0); // draws vertical green line
-    }*/
-
+    /* save to ppm */
     printf(" Enter output image file name(with extension:\n");
     scanf("%s",file_name);
-    //printf(" You enter:%s\n",file_name);
     if (SavePPM(file_name) != 0){
         printf(" Can not save file\n");
         return -1;
