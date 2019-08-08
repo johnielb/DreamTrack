@@ -13,6 +13,9 @@
 #define CAMERA_HEIGHT 240 //Control Resolution from Camera
 unsigned char pixels_buf[CAMERA_WIDTH*CAMERA_HEIGHT*4];
 double DEG2RAD = M_PI/180.0;
+double convThreshold = 60.0;
+int radiusRange = 5;
+int degStep = 10;
 
 // returns color component (color==0 -red,color==1-green,color==2-blue
 // color == 3 - luminocity
@@ -180,7 +183,7 @@ int main()
                 double sobelY = -get_pixel(row-1,col-1,setting) - 2.0*get_pixel(row-1,col,setting) - (get_pixel(row-1, col+1,setting)) +
                             (get_pixel(row+1, col-1,setting)) + 2.0*(get_pixel(row+1,col,setting)) + get_pixel(row+1,col+1,setting);
                 edges[row][col] = 0;
-                if (fabs(sobelX)+fabs(sobelY) > 70.0) edges[row][col] = 1;
+                if (fabs(sobelX)+fabs(sobelY) > convThreshold) edges[row][col] = 1;
             } else {
                 edges[row][col] = 0;
             }
@@ -196,8 +199,8 @@ int main()
             unsigned char red = get_pixel(y, x, 0);
             unsigned char green = get_pixel(y, x, 1);
             if (edges[y][x] == 1 && (float)green/(float)red < 0.4) { // if edge-detected and red THEN vote
-                for (int r=radius-10; r<radius+10; r++) {
-                    for (int deg=0; deg<360; deg+=10) {
+                for (int r=radius-radiusRange; r<radius+radiusRange; r++) {
+                    for (int deg=0; deg<360; deg+=degStep) {
                         int cx = (int) (x - (r * cos(deg*DEG2RAD)));
                         int cy = (int) (y + (r * sin(deg*DEG2RAD)));
                         if (cx >= CAMERA_WIDTH || cx < 0) { // don't look outside camera bounds
