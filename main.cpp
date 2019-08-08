@@ -20,7 +20,8 @@ private:
     int min_tilt = 32;
     int max_tilt = 65;
     double kp = 0.1;
-    int x_error, y_error;
+    int xError, yError;
+    bool isSunUp;
 
 public:
     int InitHardware();
@@ -83,8 +84,8 @@ int Tracker::MeasureSun() {
     int votes[320][240];
     for (int y=0; y<CAMERA_HEIGHT; y++) {
         for (int x=0; x<CAMERA_WIDTH; x++) {
-            char red = get_pixel(y, x, 0);
-            char green = get_pixel(y, x, 1);
+            unsigned char red = get_pixel(y, x, 0);
+            unsigned char green = get_pixel(y, x, 1);
             if (edges[y][x] == 1 && (float)green/(float)red < 0.4) { // if edge-detected and red THEN vote
                 for (int r=radius-3; r<radius+3; r++) {
                     for (int deg=0; deg<360; deg+=10) {
@@ -118,12 +119,28 @@ int Tracker::MeasureSun() {
     }
 
     // gets signal for how far to adjust servos
-    int xError = kp*(maxedX-CAMERA_WIDTH/2.0);
-    int yError = kp*(maxedY-CAMERA_HEIGHT/2.0);
+    xError = kp*(maxedX-CAMERA_WIDTH/2.0);
+    yError = kp*(maxedY-CAMERA_HEIGHT/2.0);
+
+    if ((float)maxedVote/(float)radius > 1) return 1;
+    else return 0;
 }
 
 int Tracker::FollowSun() {
-    MeasureSun();
+    int isSunUp = MeasureSun();
+    if (isSunUp == 1) {
+        elevation += yError;
+        if (elevation > max_tilt) elevation = max_tilt;
+        if (elevation < min_tilt) elevation = min_tilt;
+        azimuth += xError;
+        if (azimuth > max_tilt) azimuth = max_tilt;
+        if (azimuth < min_tilt) azimuth = min_tilt;
+    } else {
+        elevation = 47;
+        azimuth = 65;
+    }
+    SetMotors();
+    return 0;
 }
 
 int main() {

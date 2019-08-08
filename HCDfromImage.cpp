@@ -192,8 +192,8 @@ int main()
     int votes[320][240];
     for (int y=0; y<CAMERA_HEIGHT; y++) {
         for (int x=0; x<CAMERA_WIDTH; x++) {
-            char red = get_pixel(y, x, 0);
-            char green = get_pixel(y, x, 1);
+            unsigned char red = get_pixel(y, x, 0);
+            unsigned char green = get_pixel(y, x, 1);
             if (edges[y][x] == 1 && (float)green/(float)red < 0.4) { // if edge-detected and red THEN vote
                 for (int r=radius-3; r<radius+3; r++) {
                     for (int deg=0; deg<360; deg+=10) {
@@ -226,10 +226,11 @@ int main()
         }
     }
     printf("x: %d y: %d votes: %d\n",maxedX,maxedY,maxedVote);
+    printf("scaled votes: %1.2f\n", (float)maxedVote/(float)radius);
     double kp = 0.1;
     int xError = kp*(maxedX-CAMERA_WIDTH/2.0);
     int yError = kp*(maxedY-CAMERA_HEIGHT/2.0);
-    printf("xError: %d yError: %d", xError, yError);
+    printf("xError: %d yError: %d\n", xError, yError);
 
     // save convolved image to image buffer
     for (int row = 0; row<CAMERA_HEIGHT; row++) {
