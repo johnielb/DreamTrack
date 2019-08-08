@@ -3,3 +3,6 @@
 
 CMakeFiles/untitled.dir/HCDfromImage.cpp.o: ../HCDfromImage.cpp
 
+CMakeFiles/untitled.dir/main.cpp.o: ../E101.h
+CMakeFiles/untitled.dir/main.cpp.o: ../main.cpp
+

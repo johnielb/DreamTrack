@@ -1,5 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/untitled.dir/HCDfromImage.cpp.o"
+  "CMakeFiles/untitled.dir/main.cpp.o"
   "untitled.pdb"
   "untitled"
 )

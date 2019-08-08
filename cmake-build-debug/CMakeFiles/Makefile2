@@ -65,39 +65,39 @@ CMAKE_SOURCE_DIR = /Users/johniel/CLionProjects/DreamTrack
 CMAKE_BINARY_DIR = /Users/johniel/CLionProjects/DreamTrack/cmake-build-debug
 
 #=============================================================================
-# Target rules for target CMakeFiles/untitled.dir
+# Target rules for target CMakeFiles/DreamTrack.dir
 
 # All Build rule for target.
-CMakeFiles/untitled.dir/all:
-	$(MAKE) -f CMakeFiles/untitled.dir/build.make CMakeFiles/untitled.dir/depend
-	$(MAKE) -f CMakeFiles/untitled.dir/build.make CMakeFiles/untitled.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/johniel/CLionProjects/DreamTrack/cmake-build-debug/CMakeFiles --progress-num=1,2 "Built target untitled"
-.PHONY : CMakeFiles/untitled.dir/all
+CMakeFiles/DreamTrack.dir/all:
+	$(MAKE) -f CMakeFiles/DreamTrack.dir/build.make CMakeFiles/DreamTrack.dir/depend
+	$(MAKE) -f CMakeFiles/DreamTrack.dir/build.make CMakeFiles/DreamTrack.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/Users/johniel/CLionProjects/DreamTrack/cmake-build-debug/CMakeFiles --progress-num=1,2 "Built target DreamTrack"
+.PHONY : CMakeFiles/DreamTrack.dir/all
 
 # Include target in all.
-all: CMakeFiles/untitled.dir/all
+all: CMakeFiles/DreamTrack.dir/all
 
 .PHONY : all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/untitled.dir/rule: cmake_check_build_system
+CMakeFiles/DreamTrack.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/johniel/CLionProjects/DreamTrack/cmake-build-debug/CMakeFiles 2
-	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/untitled.dir/all
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/DreamTrack.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /Users/johniel/CLionProjects/DreamTrack/cmake-build-debug/CMakeFiles 0
-.PHONY : CMakeFiles/untitled.dir/rule
+.PHONY : CMakeFiles/DreamTrack.dir/rule
 
 # Convenience name for target.
-untitled: CMakeFiles/untitled.dir/rule
+DreamTrack: CMakeFiles/DreamTrack.dir/rule
 
-.PHONY : untitled
-
-# clean rule for target.
-CMakeFiles/untitled.dir/clean:
-	$(MAKE) -f CMakeFiles/untitled.dir/build.make CMakeFiles/untitled.dir/clean
-.PHONY : CMakeFiles/untitled.dir/clean
+.PHONY : DreamTrack
 
 # clean rule for target.
-clean: CMakeFiles/untitled.dir/clean
+CMakeFiles/DreamTrack.dir/clean:
+	$(MAKE) -f CMakeFiles/DreamTrack.dir/build.make CMakeFiles/DreamTrack.dir/clean
+.PHONY : CMakeFiles/DreamTrack.dir/clean
+
+# clean rule for target.
+clean: CMakeFiles/DreamTrack.dir/clean
 
 .PHONY : clean
 

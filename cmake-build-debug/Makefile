@@ -111,17 +111,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named untitled
+# Target rules for targets named DreamTrack
 
 # Build rule for target.
-untitled: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 untitled
-.PHONY : untitled
+DreamTrack: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 DreamTrack
+.PHONY : DreamTrack
 
 # fast build rule for target.
-untitled/fast:
-	$(MAKE) -f CMakeFiles/untitled.dir/build.make CMakeFiles/untitled.dir/build
-.PHONY : untitled/fast
+DreamTrack/fast:
+	$(MAKE) -f CMakeFiles/DreamTrack.dir/build.make CMakeFiles/DreamTrack.dir/build
+.PHONY : DreamTrack/fast
 
 HCDfromImage.o: HCDfromImage.cpp.o
 
@@ -129,7 +129,7 @@ HCDfromImage.o: HCDfromImage.cpp.o
 
 # target to build an object file
 HCDfromImage.cpp.o:
-	$(MAKE) -f CMakeFiles/untitled.dir/build.make CMakeFiles/untitled.dir/HCDfromImage.cpp.o
+	$(MAKE) -f CMakeFiles/DreamTrack.dir/build.make CMakeFiles/DreamTrack.dir/HCDfromImage.cpp.o
 .PHONY : HCDfromImage.cpp.o
 
 HCDfromImage.i: HCDfromImage.cpp.i
@@ -138,7 +138,7 @@ HCDfromImage.i: HCDfromImage.cpp.i
 
 # target to preprocess a source file
 HCDfromImage.cpp.i:
-	$(MAKE) -f CMakeFiles/untitled.dir/build.make CMakeFiles/untitled.dir/HCDfromImage.cpp.i
+	$(MAKE) -f CMakeFiles/DreamTrack.dir/build.make CMakeFiles/DreamTrack.dir/HCDfromImage.cpp.i
 .PHONY : HCDfromImage.cpp.i
 
 HCDfromImage.s: HCDfromImage.cpp.s
@@ -147,7 +147,7 @@ HCDfromImage.s: HCDfromImage.cpp.s
 
 # target to generate assembly for a file
 HCDfromImage.cpp.s:
-	$(MAKE) -f CMakeFiles/untitled.dir/build.make CMakeFiles/untitled.dir/HCDfromImage.cpp.s
+	$(MAKE) -f CMakeFiles/DreamTrack.dir/build.make CMakeFiles/DreamTrack.dir/HCDfromImage.cpp.s
 .PHONY : HCDfromImage.cpp.s
 
 # Help Target
@@ -158,7 +158,7 @@ help:
 	@echo "... depend"
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
-	@echo "... untitled"
+	@echo "... DreamTrack"
 	@echo "... HCDfromImage.o"
 	@echo "... HCDfromImage.i"
 	@echo "... HCDfromImage.s"

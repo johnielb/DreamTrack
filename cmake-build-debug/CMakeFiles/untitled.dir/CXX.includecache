@@ -6,6 +6,8 @@
 
 #IncludeRegexTransform: 
 
+/Users/johniel/CLionProjects/DreamTrack/E101.h
+
 /Users/johniel/CLionProjects/DreamTrack/HCDfromImage.cpp
 cstdio
 -
@@ -15,4 +17,18 @@ cctype
 -
 cmath
 -
+
+/Users/johniel/CLionProjects/DreamTrack/main.cpp
+iostream
+-
+cstdio
+-
+cstdlib
+-
+cctype
+-
+cmath
+-
+E101.h
+/Users/johniel/CLionProjects/DreamTrack/E101.h
 

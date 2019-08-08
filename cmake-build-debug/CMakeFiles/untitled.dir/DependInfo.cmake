@@ -5,6 +5,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
   "/Users/johniel/CLionProjects/DreamTrack/HCDfromImage.cpp" "/Users/johniel/CLionProjects/DreamTrack/cmake-build-debug/CMakeFiles/untitled.dir/HCDfromImage.cpp.o"
+  "/Users/johniel/CLionProjects/DreamTrack/main.cpp" "/Users/johniel/CLionProjects/DreamTrack/cmake-build-debug/CMakeFiles/untitled.dir/main.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "AppleClang")
 
