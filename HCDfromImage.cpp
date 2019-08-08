@@ -235,7 +235,8 @@ int main()
     int xError = kp*(maxedX-CAMERA_WIDTH/2.0);
     int yError = kp*(maxedY-CAMERA_HEIGHT/2.0);
     printf("xError: %d yError: %d\n", xError, yError);
-
+    double degrees = ((double)(47+xError-32)/(65-32))*180.0-90.0;
+    printf("degrees: %1.2f\n", degrees);
     // save convolved image to image buffer
     for (int row = 0; row<CAMERA_HEIGHT; row++) {
         for (int col = 0; col<CAMERA_WIDTH; col++) {

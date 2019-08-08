@@ -19,13 +19,15 @@ private:
     const int azm_servo = 1;
     int min_tilt = 32;
     int max_tilt = 65;
+    int xError, yError;
+    bool isSunUp;
+
+    // thresholds to play around with:
     double convThreshold = 60.0;
     int radiusRange = 5;
     int degStep = 10;
     float voteThreshold = 1.00;
     double kp = 0.1;
-    int xError, yError;
-    bool isSunUp;
 
 public:
     int InitHardware();
@@ -50,6 +52,8 @@ void Tracker::SetMotors() {
 }
 
 int Tracker::MeasureSun() {
+    take_picture();
+    update_screen();
     /* CONVOLUTION */
     char edges[CAMERA_HEIGHT][CAMERA_WIDTH]; // array stores edge detected values
     int rCount = 0;
@@ -144,6 +148,7 @@ int Tracker::FollowSun() {
         elevation = 47;
         azimuth = 65;
     }
+    double degrees = ((double)(elevation-min_tilt)/(max_tilt-min_tilt))*180.0-90.0;
     SetMotors();
     return 0;
 }
