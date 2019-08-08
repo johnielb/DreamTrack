@@ -159,6 +159,7 @@ int main()
     int rCount = 0;
     int diameter = 0;
     for (int row = 0; row<CAMERA_HEIGHT; row++) {
+        rCount = 0;
         for (int col = 0; col<CAMERA_WIDTH; col++) {
             int red = get_pixel(row, col, 0);
             int grn = get_pixel(row, col, 1);
@@ -195,7 +196,7 @@ int main()
             unsigned char red = get_pixel(y, x, 0);
             unsigned char green = get_pixel(y, x, 1);
             if (edges[y][x] == 1 && (float)green/(float)red < 0.4) { // if edge-detected and red THEN vote
-                for (int r=radius-3; r<radius+3; r++) {
+                for (int r=radius-10; r<radius+10; r++) {
                     for (int deg=0; deg<360; deg+=10) {
                         int cx = (int) (x - (r * cos(deg*DEG2RAD)));
                         int cy = (int) (y + (r * sin(deg*DEG2RAD)));

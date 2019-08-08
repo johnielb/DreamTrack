@@ -87,7 +87,7 @@ int Tracker::MeasureSun() {
             unsigned char red = get_pixel(y, x, 0);
             unsigned char green = get_pixel(y, x, 1);
             if (edges[y][x] == 1 && (float)green/(float)red < 0.4) { // if edge-detected and red THEN vote
-                for (int r=radius-3; r<radius+3; r++) {
+                for (int r=radius-10; r<radius+10; r++) {
                     for (int deg=0; deg<360; deg+=10) {
                         int cx = (int) (x - (r * cos(deg*DEG2RAD)));
                         int cy = (int) (y + (r * sin(deg*DEG2RAD)));
@@ -117,12 +117,12 @@ int Tracker::MeasureSun() {
             }
         }
     }
-
+    float scaledVotes = (float)maxedVote/(float)radius;
     // gets signal for how far to adjust servos
     xError = kp*(maxedX-CAMERA_WIDTH/2.0);
     yError = kp*(maxedY-CAMERA_HEIGHT/2.0);
-
-    if ((float)maxedVote/(float)radius > 1) return 1;
+    printf("xError: %d yError: %d Scaled votes: %1.2f\n", xError, yError, scaledVotes);
+    if (scaledVotes > 0.9) return 1;
     else return 0;
 }
 
