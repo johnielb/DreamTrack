@@ -13,9 +13,10 @@
 #define CAMERA_HEIGHT 240 //Control Resolution from Camera
 unsigned char pixels_buf[CAMERA_WIDTH*CAMERA_HEIGHT*4];
 double DEG2RAD = M_PI/180.0;
-double convThreshold = 60.0;
+double convThreshold = 65.0;
 int radiusRange = 5;
-int degStep = 10;
+int degStep = 9;
+double voteThreshold = 0.7;
 
 // returns color component (color==0 -red,color==1-green,color==2-blue
 // color == 3 - luminocity
@@ -157,10 +158,10 @@ int main()
         printf(" Can not open file\n");
         return -1;
     };
-    /* OUR CODE STARTS HERE: Convolution */
-    char edges[CAMERA_HEIGHT][CAMERA_WIDTH];
+    /* OUR CODE STARTS HERE: CONVOLUTION */
+    char edges[CAMERA_HEIGHT][CAMERA_WIDTH]; // array stores edge detected values
     int rCount = 0;
-    int diameter = 0;
+    double diameter = 0;
     for (int row = 0; row<CAMERA_HEIGHT; row++) {
         rCount = 0;
         for (int col = 0; col<CAMERA_WIDTH; col++) {
@@ -177,11 +178,11 @@ int main()
             if (row>0 && col>0 && row<CAMERA_HEIGHT-2 && col<CAMERA_WIDTH-2) { // convolve using Sobel kernels
                 // vertical edge detect
                 double sobelX = -get_pixel(row-1,col-1,setting) + get_pixel(row-1,col+1,setting) -
-                            2.0*(get_pixel(row, col-1,setting)) + 2.0*(get_pixel(row, col+1,setting)) -
-                            get_pixel(row+1,col-1,setting) + get_pixel(row+1,col+1,setting);
+                                2.0*(get_pixel(row, col-1,setting)) + 2.0*(get_pixel(row, col+1,setting)) -
+                                get_pixel(row+1,col-1,setting) + get_pixel(row+1,col+1,setting);
                 // horizontal edge detect
                 double sobelY = -get_pixel(row-1,col-1,setting) - 2.0*get_pixel(row-1,col,setting) - (get_pixel(row-1, col+1,setting)) +
-                            (get_pixel(row+1, col-1,setting)) + 2.0*(get_pixel(row+1,col,setting)) + get_pixel(row+1,col+1,setting);
+                                (get_pixel(row+1, col-1,setting)) + 2.0*(get_pixel(row+1,col,setting)) + get_pixel(row+1,col+1,setting);
                 edges[row][col] = 0;
                 if (fabs(sobelX)+fabs(sobelY) > convThreshold) edges[row][col] = 1;
             } else {
@@ -189,15 +190,28 @@ int main()
             }
         }
     }
-    int radius = diameter/2 + 1;
-    //printf("radius: %d\n",radius);
+    int radius = diameter/2.0;
+    if (radius > 50) radiusRange = 8;
+    else radiusRange = 5;
+    printf("radius: %d\n",radius);
 
     /* ACCUMULATION/VOTING */
     int votes[320][240];
+    for (int y=0; y<CAMERA_HEIGHT; y++) { // clear array
+        for (int x=0; x<CAMERA_WIDTH; x++) {
+            votes[x][y] = 0;
+            // fill in gaps where we're confident there's an edge
+            if (edges[y-1][x] == 1 && edges[y+1][x] == 1 || edges [y][x-1] == 1 && edges [y][x+1] == 1) {
+                edges[y][x] = 1;
+            }
+        }
+    }
     for (int y=0; y<CAMERA_HEIGHT; y++) {
         for (int x=0; x<CAMERA_WIDTH; x++) {
             unsigned char red = get_pixel(y, x, 0);
             unsigned char green = get_pixel(y, x, 1);
+            if (edges[y][x] == 1) set_pixel(y,x,255,255,255);
+            else set_pixel(y,x,0,0,0);
             if (edges[y][x] == 1 && (float)green/(float)red < 0.4) { // if edge-detected and red THEN vote
                 for (int r=radius-radiusRange; r<radius+radiusRange; r++) {
                     for (int deg=0; deg<360; deg+=degStep) {
@@ -229,27 +243,29 @@ int main()
             }
         }
     }
-    printf("x: %d y: %d votes: %d\n",maxedX,maxedY,maxedVote);
-    printf("scaled votes: %1.2f\n", (float)maxedVote/(float)radius);
-    double kp = 0.1;
-    int xError = kp*(maxedX-CAMERA_WIDTH/2.0);
-    int yError = kp*(maxedY-CAMERA_HEIGHT/2.0);
-    printf("xError: %d yError: %d\n", xError, yError);
-    double degrees = ((double)(47+xError-32)/(65-32))*180.0-90.0;
-    printf("degrees: %1.2f\n", degrees);
-    // save convolved image to image buffer
-    for (int row = 0; row<CAMERA_HEIGHT; row++) {
-        for (int col = 0; col<CAMERA_WIDTH; col++) {
-            set_pixel(row,col,0,0,0);
-            if (edges[row][col]==1) set_pixel(row,col,255,255,255);
-        }
-    }
+    printf("x: %d y: %d votes: %d\n", maxedX, maxedY, maxedVote);
 
     // mark red square
     for (int i = -1; i<1; i++) {
         for (int j = -1; j<1; j++) {
             set_pixel(maxedY+i, maxedX+j, 255,0,0);
         }
+    }
+
+    double kp = 0.1;
+    double scaledVotes = (double)maxedVote/(double)radius;
+    voteThreshold = 42.0/(double)radius;
+    // gets signal for how far to adjust servos
+    int xError = kp*(maxedX-CAMERA_WIDTH/2.0);
+    int yError = kp*(maxedY-CAMERA_HEIGHT/2.0);
+    printf("xError: %d yError: %d scaledVotes: %1.2f\n", xError, yError, scaledVotes);
+    if (edges[maxedY][maxedX] == 1 || maxedY>CAMERA_HEIGHT-radius/2 || maxedY<radius/2 || maxedVote<20) {
+        printf("Not a circle\n");
+    } else {
+        printf("Is a circle\n");
+    }
+    if (scaledVotes > voteThreshold) {
+        printf("Exceeds threshold\n");
     }
 
     /* save to ppm */
