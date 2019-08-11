@@ -98,7 +98,7 @@ int Tracker::MeasureSun() {
         for (int x=0; x<CAMERA_WIDTH; x++) {
             votes[x][y] = 0;
             // fill in gaps where we're confident there's an edge
-            if (edges[y-1][x] == 1 && edges[y+1][x] == 1 || edges [y][x-1] == 1 && edges [y][x+1] == 1) {
+            if ((edges[y-1][x] == 1 && edges[y+1][x] == 1) || (edges [y][x-1] == 1 && edges [y][x+1] == 1)) {
                 edges[y][x] = 1;
             }
         }
@@ -114,11 +114,8 @@ int Tracker::MeasureSun() {
                     for (int deg=0; deg<360; deg+=degStep) {
                         int cx = (int) (x - (r * cos(deg*DEG2RAD)));
                         int cy = (int) (y + (r * sin(deg*DEG2RAD)));
-                        if (cx >= CAMERA_WIDTH || cx < 0) { // don't look outside camera bounds
-                            continue;
-                        }
-                        if (cy >= CAMERA_HEIGHT || cy < 0) {
-                            continue;
+                        if (cx >= CAMERA_WIDTH || cx < 0 || cy >= CAMERA_HEIGHT || cy < 0) {
+                            continue; // don't look outside camera bounds
                         }
                         votes[cx][cy] += 1;
                     }
@@ -134,6 +131,8 @@ int Tracker::MeasureSun() {
     int maxedVote = 0;
     for (int y=1; y<CAMERA_HEIGHT-1; y++) {
         for (int x = 1; x < CAMERA_WIDTH - 1; x++) {
+            int squareCorner = x-radius+3; // ignore shapes with square corners
+            if (squareCorner > 0 && squareCorner < 240 && edges[squareCorner][squareCorner] == 1) continue;
             if (votes[x][y] > maxedVote) {
                 maxedVote = votes[x][y];
                 maxedX = x;

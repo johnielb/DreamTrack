@@ -201,7 +201,7 @@ int main()
         for (int x=0; x<CAMERA_WIDTH; x++) {
             votes[x][y] = 0;
             // fill in gaps where we're confident there's an edge
-            if (edges[y-1][x] == 1 && edges[y+1][x] == 1 || edges [y][x-1] == 1 && edges [y][x+1] == 1) {
+            if ((edges[y-1][x] == 1 && edges[y+1][x] == 1) || (edges [y][x-1] == 1 && edges [y][x+1] == 1)) {
                 edges[y][x] = 1;
             }
         }
@@ -217,11 +217,8 @@ int main()
                     for (int deg=0; deg<360; deg+=degStep) {
                         int cx = (int) (x - (r * cos(deg*DEG2RAD)));
                         int cy = (int) (y + (r * sin(deg*DEG2RAD)));
-                        if (cx >= CAMERA_WIDTH || cx < 0) { // don't look outside camera bounds
-                            continue;
-                        }
-                        if (cy >= CAMERA_HEIGHT || cy < 0) {
-                            continue;
+                        if (cx >= CAMERA_WIDTH || cx < 0 || cy >= CAMERA_HEIGHT || cy < 0) {
+                            continue; // don't look outside camera bounds
                         }
                         votes[cx][cy] += 1;
                     }
@@ -236,6 +233,8 @@ int main()
     int maxedVote = 0;
     for (int y=1; y<CAMERA_HEIGHT-1; y++) {
         for (int x = 1; x < CAMERA_WIDTH - 1; x++) {
+            int squareCorner = x-radius+3; // ignore shapes with square corners
+            if (squareCorner > 0 && squareCorner < 240 && edges[squareCorner][squareCorner] == 1) continue;
             if (votes[x][y] > maxedVote) {
                 maxedVote = votes[x][y];
                 maxedX = x;
@@ -249,6 +248,8 @@ int main()
     for (int i = -1; i<1; i++) {
         for (int j = -1; j<1; j++) {
             set_pixel(maxedY+i, maxedX+j, 255,0,0);
+            set_pixel(maxedY-radius+3+i, maxedX-radius+3+j, 0, 128, 255);
+            set_pixel(CAMERA_HEIGHT-radius/2, maxedX+i, 0, 255, 0);
         }
     }
 
@@ -258,7 +259,8 @@ int main()
     // gets signal for how far to adjust servos
     int xError = kp*(maxedX-CAMERA_WIDTH/2.0);
     int yError = kp*(maxedY-CAMERA_HEIGHT/2.0);
-    printf("xError: %d yError: %d scaledVotes: %1.2f\n", xError, yError, scaledVotes);
+    printf("xError: %d yError: %d scaledVotes: %1.2f thr: %1.2f\n", xError, yError, scaledVotes, voteThreshold);
+
     if (edges[maxedY][maxedX] == 1 || maxedY>CAMERA_HEIGHT-radius/2 || maxedY<radius/2 || maxedVote<20) {
         printf("Not a circle\n");
     } else {
