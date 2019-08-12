@@ -148,12 +148,15 @@ int Tracker::MeasureSun() {
     for (int i = -2; i<2; i++) {
         for (int j = -2; j<2; j++) {
             set_pixel(maxedY+i, maxedX+j, 255,0,0);
+            set_pixel(maxedY-radius+3+i, maxedX-radius+1+j, 0, 128, 255);
+            set_pixel(maxedY+i, maxedX-radius+3+j, 128, 128, 128);
+            set_pixel(CAMERA_HEIGHT-radius/2, maxedX+i, 0, 255, 0);
         }
     }
     update_screen();
 
     double scaledVotes = (double)maxedVote/(double)radius;
-    voteThreshold = 42.0/(double)radius;
+    voteThreshold = 40.0/(double)radius;
     // gets signal for how far to adjust servos
     xError = kp*(maxedX-CAMERA_WIDTH/2.0);
     yError = kp*(maxedY-CAMERA_HEIGHT/2.0);

@@ -245,24 +245,25 @@ int main()
     printf("x: %d y: %d votes: %d\n", maxedX, maxedY, maxedVote);
 
     // mark red square
-    for (int i = -1; i<1; i++) {
-        for (int j = -1; j<1; j++) {
+    for (int i = -2; i<2; i++) {
+        for (int j = -2; j<2; j++) {
             set_pixel(maxedY+i, maxedX+j, 255,0,0);
-            set_pixel(maxedY-radius+3+i, maxedX-radius+3+j, 0, 128, 255);
+            set_pixel(maxedY-radius+3+i, maxedX-radius+1+j, 0, 128, 255);
+            set_pixel(maxedY+i, maxedX-radius+3+j, 128, 128, 128);
             set_pixel(CAMERA_HEIGHT-radius/2, maxedX+i, 0, 255, 0);
         }
     }
 
     double kp = 0.1;
     double scaledVotes = (double)maxedVote/(double)radius;
-    voteThreshold = 42.0/(double)radius;
+    voteThreshold = 40.0/(double)radius;
     // gets signal for how far to adjust servos
     int xError = kp*(maxedX-CAMERA_WIDTH/2.0);
     int yError = kp*(maxedY-CAMERA_HEIGHT/2.0);
     printf("xError: %d yError: %d scaledVotes: %1.2f thr: %1.2f\n", xError, yError, scaledVotes, voteThreshold);
 
     if (edges[maxedY][maxedX] == 1 || maxedY>CAMERA_HEIGHT-radius/2 || maxedY<radius/2 || maxedVote<20) {
-        printf("Not a circle\n");
+        printf("Not a circle\n"); // edges[maxedY][maxedX-radius+1] == 0 ||
     } else {
         printf("Is a circle\n");
     }
