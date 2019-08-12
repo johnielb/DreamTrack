@@ -19,7 +19,7 @@ private:
     const int azm_servo = 3;
     int min_tilt = 32;
     int max_tilt = 65;
-    int xError, yError;
+    int xError, yError, lostCount;
     bool isSunUp;
 
     // thresholds to play around with:
@@ -146,8 +146,8 @@ int Tracker::MeasureSun() {
     if (edges[maxedY][maxedX] == 1 || maxedY>CAMERA_HEIGHT-radius/2 || maxedY<radius/2 || maxedVote<20) return 0;
 
     // mark red square
-    for (int i = -1; i<1; i++) {
-        for (int j = -1; j<1; j++) {
+    for (int i = -2; i<2; i++) {
+        for (int j = -2; j<2; j++) {
             set_pixel(maxedY+i, maxedX+j, 255,0,0);
         }
     }
@@ -159,23 +159,25 @@ int Tracker::MeasureSun() {
     xError = kp*(maxedX-CAMERA_WIDTH/2.0);
     yError = kp*(maxedY-CAMERA_HEIGHT/2.0);
     printf("xError: %d yError: %d Scaled votes: %1.2f\n", xError, yError, scaledVotes);
-    if (scaledVotes > voteThreshold && scaledVotes < 2.5) return 1;
-    else return 0;
+    return 1;
 }
 
 void Tracker::FollowSun() {
     int isSunUp = MeasureSun();
     if (isSunUp == 1) {
+        lostCount = 0;
         elevation += yError;
         if (elevation > max_tilt) elevation = max_tilt;
         if (elevation < min_tilt) elevation = min_tilt;
         azimuth += xError;
         if (azimuth > max_tilt) azimuth = max_tilt;
         if (azimuth < min_tilt) azimuth = min_tilt;
-    } else {
+    } else if (lostCount > 5) {
         printf("No sun detected, resetting\n");
         //elevation = 47;
-        azimuth = 47;
+        azimuth = 53;
+    } else {
+        lostCount++;
     }
     printf("E: %d A: %d\n", elevation, azimuth);
     //elevation = 60;
