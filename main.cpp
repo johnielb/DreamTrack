@@ -15,7 +15,7 @@ class Tracker {
 private:
     int elevation = 57;
     const int elv_servo = 5;
-    int azimuth = 47;
+    int azimuth = 53;
     const int azm_servo = 3;
     int min_tilt = 32;
     int max_tilt = 65;
@@ -57,21 +57,21 @@ int Tracker::MeasureSun() {
     update_screen();
     /* CONVOLUTION */
     char edges[CAMERA_HEIGHT][CAMERA_WIDTH]; // array stores edge detected values
-    int rCount = 0;
+    int diamCount = 0;
     double diameter = 0;
     for (int row = 0; row<CAMERA_HEIGHT; row++) {
-        rCount = 0;
+        diamCount = 0;
         for (int col = 0; col<CAMERA_WIDTH; col++) {
             int red = get_pixel(row, col, 0);
             int grn = get_pixel(row, col, 1);
             // sun diameter detection
             if ((float)grn/(float)red < 0.4) {
-                rCount++;
+                diamCount++;
             } else {
-                if (rCount>diameter) diameter=rCount;
-                rCount = 0;
+                if (diamCount > diameter) diameter=diamCount;
+                diamCount = 0;
             }
-            int setting = 0; // convolve redness vals
+            int setting = 2; // convolve blueness vals
             if (row>0 && col>0 && row<CAMERA_HEIGHT-2 && col<CAMERA_WIDTH-2) { // convolve using Sobel kernels
                 // vertical edge detect
                 double sobelX = -get_pixel(row-1,col-1,setting) + get_pixel(row-1,col+1,setting) -
@@ -87,7 +87,7 @@ int Tracker::MeasureSun() {
             }
         }
     }
-    int radius = diameter/2.0;
+    int radius = diameter*0.51;
     if (radius > 50) radiusRange = 8;
     else radiusRange = 5;
     printf("radius: %d\n",radius);
@@ -107,8 +107,6 @@ int Tracker::MeasureSun() {
         for (int x=0; x<CAMERA_WIDTH; x++) {
             unsigned char red = get_pixel(y, x, 0);
             unsigned char green = get_pixel(y, x, 1);
-            if (edges[y][x] == 1) set_pixel(y,x,255,255,255);
-            else set_pixel(y,x,0,0,0);
             if (edges[y][x] == 1 && (float)green/(float)red < 0.4) { // if edge-detected and red THEN vote
                 for (int r=radius-radiusRange; r<radius+radiusRange; r++) {
                     for (int deg=0; deg<360; deg+=degStep) {
@@ -132,7 +130,7 @@ int Tracker::MeasureSun() {
     for (int y=1; y<CAMERA_HEIGHT-1; y++) {
         for (int x = 1; x < CAMERA_WIDTH - 1; x++) {
             int squareCorner = x-radius+3; // ignore shapes with square corners
-            if (squareCorner > 0 && squareCorner < 240 && edges[squareCorner][squareCorner] == 1) continue;
+            //if (squareCorner > 0 && squareCorner < 240 && edges[squareCorner][squareCorner] == 1) continue;
             if (votes[x][y] > maxedVote) {
                 maxedVote = votes[x][y];
                 maxedX = x;
@@ -141,10 +139,28 @@ int Tracker::MeasureSun() {
         }
     }
     printf("x: %d y: %d votes: %d\n", maxedX, maxedY, maxedVote);
-    // don't recalculate
-    if (edges[maxedY][maxedX] == 1 || maxedY>CAMERA_HEIGHT-radius/2 || maxedY<radius/2 || maxedVote<20) return 0;
 
-    // mark red square
+    // count how many red pixels on
+    diamCount = 0;
+    for (int c=0; c<CAMERA_WIDTH; c++) {
+        int red = get_pixel(maxedY, c, 0);
+        int grn = get_pixel(maxedY, c, 1);
+        if ((float) grn / (float) red < 0.4) {
+            diamCount++;
+        }
+    }
+
+    // set convolutional result only after getting pixel vals
+    for (int y=0; y<CAMERA_HEIGHT; y++) {
+        for (int x=0; x<CAMERA_WIDTH; x++) {
+            if (edges[y][x] == 1) set_pixel(y,x,255,255,255);
+            else set_pixel(y,x,0,0,0);
+        }
+    }
+    // don't recalculate. commented out: edges[maxedY][maxedX] == 1 ||
+    if (maxedY>CAMERA_HEIGHT-radius/2 || maxedY<radius/2 || maxedVote<20 || abs(diamCount-2*radius) > 10) return 0;
+
+    // mark important landmarks
     for (int i = -2; i<2; i++) {
         for (int j = -2; j<2; j++) {
             set_pixel(maxedY+i, maxedX+j, 255,0,0);
@@ -160,7 +176,7 @@ int Tracker::MeasureSun() {
     // gets signal for how far to adjust servos
     xError = kp*(maxedX-CAMERA_WIDTH/2.0);
     yError = kp*(maxedY-CAMERA_HEIGHT/2.0);
-    printf("xError: %d yError: %d Scaled votes: %1.2f\n", xError, yError, scaledVotes);
+    printf("xError: %d yError: %d Scaled votes: %1.2f vs %1.2f\n", xError, yError, scaledVotes, voteThreshold);
     return 1;
 }
 
@@ -176,13 +192,12 @@ void Tracker::FollowSun() {
         if (azimuth < min_tilt) azimuth = min_tilt;
     } else if (lostCount > 5) {
         printf("No sun detected, resetting\n");
-        //elevation = 47;
+        elevation = 57;
         azimuth = 53;
     } else {
         lostCount++;
     }
     printf("E: %d A: %d\n", elevation, azimuth);
-    //elevation = 60;
     //double degrees = ((double)(elevation-min_tilt)/(max_tilt-min_tilt))*180.0-90.0;
     //sleep1(50);
     SetMotors();
