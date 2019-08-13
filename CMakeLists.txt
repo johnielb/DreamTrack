@@ -3,4 +3,4 @@ project(DreamTrack)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(DreamTrack HCDfromImage.cpp)
+add_executable(DreamTrack testImage.cpp)

@@ -123,32 +123,32 @@ DreamTrack/fast:
 	$(MAKE) -f CMakeFiles/DreamTrack.dir/build.make CMakeFiles/DreamTrack.dir/build
 .PHONY : DreamTrack/fast
 
-HCDfromImage.o: HCDfromImage.cpp.o
+testImage.o: testImage.cpp.o
 
-.PHONY : HCDfromImage.o
+.PHONY : testImage.o
 
 # target to build an object file
-HCDfromImage.cpp.o:
-	$(MAKE) -f CMakeFiles/DreamTrack.dir/build.make CMakeFiles/DreamTrack.dir/HCDfromImage.cpp.o
-.PHONY : HCDfromImage.cpp.o
+testImage.cpp.o:
+	$(MAKE) -f CMakeFiles/DreamTrack.dir/build.make CMakeFiles/DreamTrack.dir/testImage.cpp.o
+.PHONY : testImage.cpp.o
 
-HCDfromImage.i: HCDfromImage.cpp.i
+testImage.i: testImage.cpp.i
 
-.PHONY : HCDfromImage.i
+.PHONY : testImage.i
 
 # target to preprocess a source file
-HCDfromImage.cpp.i:
-	$(MAKE) -f CMakeFiles/DreamTrack.dir/build.make CMakeFiles/DreamTrack.dir/HCDfromImage.cpp.i
-.PHONY : HCDfromImage.cpp.i
+testImage.cpp.i:
+	$(MAKE) -f CMakeFiles/DreamTrack.dir/build.make CMakeFiles/DreamTrack.dir/testImage.cpp.i
+.PHONY : testImage.cpp.i
 
-HCDfromImage.s: HCDfromImage.cpp.s
+testImage.s: testImage.cpp.s
 
-.PHONY : HCDfromImage.s
+.PHONY : testImage.s
 
 # target to generate assembly for a file
-HCDfromImage.cpp.s:
-	$(MAKE) -f CMakeFiles/DreamTrack.dir/build.make CMakeFiles/DreamTrack.dir/HCDfromImage.cpp.s
-.PHONY : HCDfromImage.cpp.s
+testImage.cpp.s:
+	$(MAKE) -f CMakeFiles/DreamTrack.dir/build.make CMakeFiles/DreamTrack.dir/testImage.cpp.s
+.PHONY : testImage.cpp.s
 
 # Help Target
 help:
@@ -159,9 +159,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... edit_cache"
 	@echo "... DreamTrack"
-	@echo "... HCDfromImage.o"
-	@echo "... HCDfromImage.i"
-	@echo "... HCDfromImage.s"
+	@echo "... testImage.o"
+	@echo "... testImage.i"
+	@echo "... testImage.s"
 .PHONY : help
 
 

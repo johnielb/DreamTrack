@@ -26,7 +26,7 @@ private:
     double convThreshold = 65.0;
     int radiusRange = 5;
     int degStep = 10;
-    double voteThreshold = 0.7;
+    int voteThr = 10;
     double kp = 0.05;
 
 public:
@@ -195,8 +195,8 @@ int Tracker::MeasureSun() {
 	} else if (maxedY>CAMERA_HEIGHT-radius/2 || maxedY<radius/2) {
 		printf("Out of bounds\n");
 		return 0;
-	} else if (maxedVote<10) {
-		printf("No more votes\n");
+	} else if (maxedVote<voteThr) {
+		printf("Not enough votes\n");
 		return 0;
 	} else if (abs(diameter/2-radius) > 5) {
 		printf("No middle red line\n");
