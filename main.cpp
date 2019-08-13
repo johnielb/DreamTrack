@@ -19,15 +19,15 @@ private:
     const int azm_servo = 3;
     int min_tilt = 32;
     int max_tilt = 65;
-    int xError, yError, lostCount;
+    int xError, yError;
     bool isSunUp;
 
     // thresholds to play around with:
     double convThreshold = 65.0;
     int radiusRange = 5;
-    int degStep = 9;
+    int degStep = 10;
     double voteThreshold = 0.7;
-    double kp = 0.08;
+    double kp = 0.05;
 
 public:
     int InitHardware();
@@ -129,8 +129,26 @@ int Tracker::MeasureSun() {
     int maxedVote = 0;
     for (int y=1; y<CAMERA_HEIGHT-1; y++) {
         for (int x = 1; x < CAMERA_WIDTH - 1; x++) {
-            int squareCorner = x-radius+3; // ignore shapes with square corners
-            //if (squareCorner > 0 && squareCorner < 240 && edges[squareCorner][squareCorner] == 1) continue;
+			bool isLeftCorner = false;
+			bool isRightCorner = false;
+
+            int squareX = x-radius+3; // ignore shapes with a top left square corner
+            int squareY = y-radius+3;
+            if (squareX > 0 && squareY > 0) {
+				int red = get_pixel(squareY, squareX, 0);
+				int grn = get_pixel(squareY, squareX, 1);
+				if ((float)grn/(float)red < 0.4 && edges[squareY][squareX] == 1) isLeftCorner = true;
+			}
+            
+            squareX = x+radius-3; // move to bottom right corner
+            squareY = y+radius-3;
+            if (squareX < 240 && squareY < 240) {
+				int red = get_pixel(squareY, squareX, 0);
+				int grn = get_pixel(squareY, squareX, 1);
+				if ((float)grn/(float)red < 0.4 && edges[squareY][squareX] == 1) isRightCorner = true;
+			}
+            if (isLeftCorner && isRightCorner) continue;
+
             if (votes[x][y] > maxedVote) {
                 maxedVote = votes[x][y];
                 maxedX = x;
@@ -140,13 +158,17 @@ int Tracker::MeasureSun() {
     }
     printf("x: %d y: %d votes: %d\n", maxedX, maxedY, maxedVote);
 
-    // count how many red pixels on
+    // count how many red pixels in middle
     diamCount = 0;
-    for (int c=0; c<CAMERA_WIDTH; c++) {
-        int red = get_pixel(maxedY, c, 0);
-        int grn = get_pixel(maxedY, c, 1);
+    diameter = 0;
+    for (int r=0; r<CAMERA_HEIGHT; r++) {
+        int red = get_pixel(r, maxedX, 0);
+        int grn = get_pixel(r, maxedX, 1);
         if ((float) grn / (float) red < 0.4) {
             diamCount++;
+        } else {
+            if (diamCount > diameter) diameter=diamCount;
+            diamCount = 0;
         }
     }
 
@@ -157,49 +179,55 @@ int Tracker::MeasureSun() {
             else set_pixel(y,x,0,0,0);
         }
     }
-    // don't recalculate. commented out: edges[maxedY][maxedX] == 1 ||
-    if (maxedY>CAMERA_HEIGHT-radius/2 || maxedY<radius/2 || maxedVote<20 || abs(diamCount-2*radius) > 10) return 0;
-
-    // mark important landmarks
+    // mark voted centre
     for (int i = -2; i<2; i++) {
         for (int j = -2; j<2; j++) {
             set_pixel(maxedY+i, maxedX+j, 255,0,0);
-            set_pixel(maxedY-radius+3+i, maxedX-radius+1+j, 0, 128, 255);
-            set_pixel(maxedY+i, maxedX-radius+3+j, 128, 128, 128);
-            set_pixel(CAMERA_HEIGHT-radius/2, maxedX+i, 0, 255, 0);
         }
     }
+    xError = 0;
+    yError = 0;
+    
+    update_screen();
+    if (edges[maxedY][maxedX] == 1) {
+		printf("Half circle\n");
+		return 0;
+	} else if (maxedY>CAMERA_HEIGHT-radius/2 || maxedY<radius/2) {
+		printf("Out of bounds\n");
+		return 0;
+	} else if (maxedVote<10) {
+		printf("No more votes\n");
+		return 0;
+	} else if (abs(diameter/2-radius) > 5) {
+		printf("No middle red line\n");
+		return 0;
+	} 
+
     update_screen();
 
-    double scaledVotes = (double)maxedVote/(double)radius;
-    voteThreshold = 40.0/(double)radius;
     // gets signal for how far to adjust servos
     xError = kp*(maxedX-CAMERA_WIDTH/2.0);
     yError = kp*(maxedY-CAMERA_HEIGHT/2.0);
-    printf("xError: %d yError: %d Scaled votes: %1.2f vs %1.2f\n", xError, yError, scaledVotes, voteThreshold);
+    printf("xError: %d yError: %d\n", xError, yError);
     return 1;
 }
 
 void Tracker::FollowSun() {
     int isSunUp = MeasureSun();
-    if (isSunUp == 1) {
-        lostCount = 0;
+    if (isSunUp) {
         elevation += yError;
         if (elevation > max_tilt) elevation = max_tilt;
         if (elevation < min_tilt) elevation = min_tilt;
         azimuth += xError;
         if (azimuth > max_tilt) azimuth = max_tilt;
         if (azimuth < min_tilt) azimuth = min_tilt;
-    } else if (lostCount > 5) {
-        printf("No sun detected, resetting\n");
-        elevation = 57;
-        azimuth = 53;
     } else {
-        lostCount++;
+        printf("No sun detected, resetting\n");
+        elevation = 51;
+        azimuth = 55;
     }
-    printf("E: %d A: %d\n", elevation, azimuth);
-    //double degrees = ((double)(elevation-min_tilt)/(max_tilt-min_tilt))*180.0-90.0;
-    //sleep1(50);
+    double degrees = ((double)(elevation-min_tilt)/(max_tilt-min_tilt))*180.0-90.0;
+    printf("E: %d A: %d Deg: %1.2f\n", elevation, azimuth,degrees);
     SetMotors();
 }
 

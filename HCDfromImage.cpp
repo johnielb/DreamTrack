@@ -276,8 +276,8 @@ int main()
     int xError = kp*(maxedX-CAMERA_WIDTH/2.0);
     int yError = kp*(maxedY-CAMERA_HEIGHT/2.0);
     printf("xError: %d yError: %d scaledVotes: %1.2f thr: %1.2f\n", xError, yError, scaledVotes, voteThreshold);
-    if (maxedY>CAMERA_HEIGHT-radius/2 || maxedY<radius/2 || maxedVote<10 || abs(diamCount-2*radius) > 10) {
-        // edges[maxedY][maxedX] == 1 ||
+    if (edges[maxedY][maxedX] == 1 || maxedY>CAMERA_HEIGHT-radius/2 || maxedY<radius/2 || maxedVote<10 || abs(diamCount-2*radius) > 10) {
+        //
         printf("NOT\n"); // edges[maxedY][maxedX-radius+1] == 0 ||
     } else {
         printf("YES\n");
